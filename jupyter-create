@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Creating Jupyter environment in" $(pwd)
+python3 -m venv ./.venv
+sh -c "source .venv/bin/activate && pip3 install --upgrade pip && pip3 install git+https://github.com/ptoraskar/rvenv.git wheel jupyter && eval $(rvenv -e) && RScript -e 'install.packages(c("IRkernel", "mvtnorm"), repo = "http://cran.fhcrc.org/"); IRkernel::installspec()'"
+echo "Created Jupyter environment in" $(pwd)

@@ -18,3 +18,6 @@ dw = dw.reshape((nPaths, nSteps))
 
 Spot = 13310
 vola = 0.2
+
+S = Spot * np.exp(np.apply_along_axis(np.sum, 1, (-0.5*vola**2)*1/252 + vola*np.sqrt(1/252)*dw))
+

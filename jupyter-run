@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Starting Jupyter environment in" $(pwd)
+source .venv/bin/activate && eval $(rvenv -e) && jupyter-notebook
