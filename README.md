@@ -1,8 +1,8 @@
-# Pyodide-Jekyll
+# Barrier Options Hedging
 
-Jekyll static site with rich Python embedded browser client powered by Pyodide 🐍
+Please visit [Website](https://barrier-options-hedging.mikush.in/) and press ⏩ button in Explore mode to run the sample notebook.
 
-## Deployment
+## Offline browser-based deployment
 
 Here, Pyodide is combined with Jekyll, in order to build GutHub pages and/or easily test local deployment:
 
@@ -12,9 +12,11 @@ Here, Pyodide is combined with Jekyll, in order to build GutHub pages and/or eas
 1. To build the site and serve it: `bundle exec jekyll serve`.
 1. To test: `http://localhost:4000`.
 
-See the [Jekyll](http://jekyllrb.com/) and [GitHub Pages](https://pages.github.com/)
-documentation for more info.
+## Offline Jupyter-based deployment
 
-## Testing Python
+```sh
+brew install R python3
+./jupyter-create
+./jupyter-run
+```
 
-Open the [Website](https://pyodide-jekyll.mikush.in/) and press ⏩ button in Explore mode to run the sample notebook.

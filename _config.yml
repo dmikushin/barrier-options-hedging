@@ -1,8 +1,8 @@
 # Website settings
-url: "https://pyodide-jekyll.mikush.in/"
+url: "https://barrier-options-hedging.mikush.in/"
 
 # Jekyll build settings
-repository: dmikushin/pyodide-jekyll
+repository: dmikushin/barrier-options-hedging
 
 # Plugins (GitHub Pages only support a few)
 plugins:
