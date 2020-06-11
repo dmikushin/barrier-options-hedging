@@ -27,3 +27,12 @@ S = Spot * np.exp(np.apply_along_axis(np.cumsum, 0, (-0.5*vola**2)*1/nSteps + vo
 
 S = np.concatenate((np.full((1, S.shape[1]), Spot), S), axis=0)
 
+t = range(nSteps + 1)
+for i in range(nPaths):
+    plt.plot(t, S[:,i])
+
+plt.title('Random paths')
+plt.ylabel('Share price [$]')
+plt.xlabel('Business days')
+plt.show()
+
