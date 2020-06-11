@@ -25,5 +25,5 @@ vola = 0.2
 
 S = Spot * np.exp(np.apply_along_axis(np.cumsum, 0, (-0.5*vola**2)*1/nSteps + vola*np.sqrt(1/nSteps)*dw))
 
-S<-rbind(rep(Spot,ncol(S)),S)
+S = np.concatenate((np.full((1, S.shape[1]), Spot), S), axis=0)
 
