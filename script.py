@@ -14,14 +14,19 @@ b = 0.1 # Carry rate
 r = 0.1 # Yearly interest rate
 Hs = [50, 60, 70] # Barrier level
 
-nPaths = 1000 # number of paths
+nPaths = 10 # number of paths
 
 # set the random seed https://en.wikipedia.org/wiki/Random_seed
 np.random.seed(123)
 
+fig, axs = plt.subplots(len(Hs), len(Ts))
+
 df = []
-for H in Hs :
-    for T in Ts :
+for iH in range(len(Hs)) :
+    for iT in range(len(Ts)) :
+        H = Hs[iH]
+        T = Ts[iT]
+
         nSteps = int(252 * T)
 
         # random generation for the normal distribution with mean 0 and standard deviation 1
@@ -45,11 +50,18 @@ for H in Hs :
         
         payoff = payoff * (1 + r) ** (-T)
         price = np.mean(payoff)
-        t = pd.Series(data = { 'H' : H, 'T' : T, 'price' : price })
-        df.append(t)
+        row = pd.Series(data = { 'H' : H, 'T' : T, 'price' : price })
+        df.append(row)
+
+        t = range(nSteps + 1)
+        for i in range(nPaths) :
+            axs[iH, iT].plot(t, S[:,i])
+        axs[iH, iT].set_title('H = {}, T = {}, price = {}'.format(H, T, price))
 
 df = pd.concat(df,1).T
 print(df)
 
 df.sort_values('H')
 
+plt.subplots_adjust(hspace=0.5)
+plt.show()
