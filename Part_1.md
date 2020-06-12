@@ -1,6 +1,6 @@
 # Barrier Options Hedging
 
-Assume we want to buy a down-and-in put option with Americal type of barrier (continuous monitoring) on a single underlying, S<sub>T</sub>. The payoff function at maturity is given by:
+Assume we want to buy a down-and-in put option with American type of barrier (continuous monitoring) on a single underlying, S<sub>T</sub>. The payoff function at maturity is given by:
 
 <pre>
 DIP(T) = max(K - S<sub>T</sub>) * 1{S<sub>t</sub> < H},
