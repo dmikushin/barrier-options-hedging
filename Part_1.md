@@ -21,7 +21,9 @@ We create a pricing function for the above barrier option using the Monte Carlo 
 
 The Python pricing function uses the following default presets:
 
-* µ = r = 0.1%, σ = 0.25, S<sub>t0</sub> = 100, K = 100
-* T = {0.5, 1.0, 1.5}
-* H = {50, 60, 70}
+* µ = r = 0.1%
+* Volatility σ = 0.25
+* Initial stock price S<sub>t0</sub> = 100, K = 100
+* Time to expiration T = {0.5, 1.0, 1.5}
+* Barrier level H = {50, 60, 70}
 
