@@ -56,7 +56,7 @@ for iH in range(len(Hs)) :
         t = range(nSteps + 1)
         for i in range(nPaths) :
             axs[iH, iT].plot(t, S[:,i])
-        axs[iH, iT].set_title('H = {:.2f}, T = {:.2f}, price = {:.2f}'.format(H, T, price))
+        axs[iH, iT].set_title('H = {:.2f}, T = {:.2f}, price = {:.2f}'.format(H, T, price), size = 7)
 
 df = pd.concat(df,1).T
 print(df)
