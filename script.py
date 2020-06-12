@@ -1,131 +1,55 @@
-import math
-from scipy.stats.distributions import norm
-import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 
-putCall = 'put'  # Put 'put' or call 'call'
-S = 100 # Initial stock price
+#####################################################################
+#               Generate random paths for shares
+#####################################################################
+
+Spot = 100 # Initial stock price
 K = 100 # Strike price of an option
-T = 0.5 # 1.0 1.5 # Time to maturity, years
-sigma = 0.25 # Volatility σ
+Ts = [0.5, 1, 1.5] # Time to maturity, years
+sigma = 0.25 # Volatility
 b = 0.1 # Carry rate
 r = 0.1 # Yearly interest rate
-H = 50 # 60 70 # Barrier level
-inOut = 'in' # In 'in' or 'out'
+Hs = [50, 60, 70] # Barrier level
 
-# Function for evaluating the option price given the underlying price
-def price_option(S) :
-    if putCall == 'call':
-        phi = 1
-    else:
-        phi = -1
+nPaths = 1000 # number of paths
 
-    if S > H :
-        eta = 1
-    else:
-        eta = -1
+# set the random seed https://en.wikipedia.org/wiki/Random_seed
+np.random.seed(123)
 
-    sigma2 = sigma ** 2
-    mu = (b - (sigma2 / 2)) / sigma2
-    landa = math.sqrt(mu ** 2.0 + (2 * r) / sigma2)
-    x1 = (math.log(S / K)) / (sigma * math.sqrt(T)) + (1 + mu) * sigma * math.sqrt(T)
-    x2 = (math.log(S / H)) / (sigma * math.sqrt(T)) + (1 + mu) * sigma * math.sqrt(T)
-    y1 = math.log((H ** 2) / (S * K)) / (sigma * math.sqrt(T)) + (1 + mu) * sigma * math.sqrt(T)
-    y2 = math.log(H / S) / (sigma * math.sqrt(T)) + (1 + mu) * sigma * math.sqrt(T)
-    z = math.log(H / S) / (sigma * math.sqrt(T)) + landa * sigma * math.sqrt(T)
+df = []
+for H in Hs :
+    for T in Ts :
+        nSteps = int(252 * T)
 
-    n1 = phi * x1 - phi * sigma * math.sqrt(T)
-    A = phi * S * math.exp(b - r) * norm.cdf(phi * x1, 0, 1) - phi * K * math.exp(-r * T) * norm.cdf(n1, 0, 1)
+        # random generation for the normal distribution with mean 0 and standard deviation 1
+        dw = np.random.normal(loc=0.0, scale=1.0, size=nPaths * nSteps)
 
-    n2 = phi * x2 - phi * sigma * math.sqrt(T)
-    B = phi * S * math.exp(b - r) * norm.cdf(phi * x2, 0, 1) - phi * K * math.exp(-r * T) * norm.cdf(n2, 0, 1)
+        # deterministic mode to use for testing
+        # f = lambda i, j: (i + j + 2) / (nPaths + nSteps)
+        # dw = np.transpose(np.fromfunction(np.vectorize(f), (nPaths, nSteps), dtype=float))
 
-    n3 = eta * y1
-    n4 = eta * y1 - eta * sigma * math.sqrt(T)
-    C = phi * S * math.exp(b - r) * (H / S) ** (2 * (mu + 1)) * norm.cdf(n3, 0, 1) - \
-        phi * K * math.exp(-r * T) * (H / S) ** (2 * mu) * norm.cdf(n4, 0, 1)
+        # reshape normal distribution to 2D
+        dw = dw.reshape((nSteps, nPaths))
 
-    n5 = eta * y2
-    n6 = eta * y2 - eta * sigma * math.sqrt(T)
-    D = phi * S * math.exp(b - r) * (H / S) ** (2 * (mu + 1)) * norm.cdf(n5,0,1) - \
-        phi * K * math.exp(-r * T) * (H / S) ** (2 * mu) * norm.cdf(n6, 0, 1)
+        S = Spot * np.exp(np.apply_along_axis(np.cumsum, 0, (-0.5 * sigma ** 2) * 1 / nSteps + sigma * np.sqrt(1/nSteps) * dw))
 
-    n9 = norm.cdf(eta * x2 - eta * sigma * math.sqrt(T), 0, 1)
-    n10 = norm.cdf(eta * y2 - eta * sigma * math.sqrt(T), 0, 1)
-    E = math.exp(-r * T) * (n9 - (H / S) ** (2 * mu) * n10)
+        S = np.concatenate((np.full((1, S.shape[1]), Spot), S), axis = 0)
 
-    n11 = norm.cdf(z * eta, 0,1)
-    n12 = norm.cdf(eta * z - 2 * eta * landa * sigma * math.sqrt(T), 0, 1)
-    F = math.exp(-r * T) * ((H / S) ** (mu + landa) * (n11) - (H / S) ** (mu - landa) * n12)
+        payoff = np.maximum(K - S[-1,:], 0) * (np.min(S, 0) < H) # "in" option "put"
+        # payoff = np.maximum(S[-1,:] - K, 0) * (np.min(S,0) < H) # "in" option "call"
+        # payoff = np.maximum(S[-1,:] - K, 0) * (np.min(S,0) > H) # "out" option "call"
+        # payoff = np.maximum(K - S[-1,:], 0) * (np.min(S,0) > H) # "out" option "put"
+        
+        payoff = payoff * (1 + r) ** (-T)
+        price = np.mean(payoff)
+        t = pd.Series(data = { 'H' : H, 'T' : T, 'price' : price })
+        df.append(t)
 
-    if putCall == 'put':
-        if K < H:
-            if S > H:
-                if inOut == 'in':
-                    price = A + E
-                elif inOut == 'out':
-                    price = F
-            else:
-                if inOut == 'in':
-                    price = C + E
-                elif inOut == 'out':
-                    price = A - C + F
-        else:
-            if S > H:
-                if inOut == 'in':
-                    price = B - C + D + E
-                elif inOut == 'out':
-                    price = A - B + C - D + F
-            else:
-                if inOut == 'in':
-                    price = A - B + D + E
-                elif inOut == 'out':
-                    price = B - D + F
-    else:
-        if K < H:
-            if S > H:
-                if inOut == 'in':
-                    price = A - B + D + E
-                elif inOut == 'out':
-                    price = B - D + F
-            else:
-                if inOut == 'in':
-                    price = B - C + D + E
-                elif inOut == 'out':
-                    price = A - B + C - D + F
-        else:
-            if S > H:
-                if inOut == 'in':
-                    price = C + E
-                elif inOut == 'out':
-                    price = A - C + F
-            else:
-                if inOut == 'in':
-                    price = A + E
-                elif inOut == 'out':
-                    price = F
+df = pd.concat(df,1).T
+print(df)
 
-    if price < 0:
-        price = 0
-
-    return price
-
-# Underlying price
-print(price_option(S))
-S = int(S)
-u_price = range (S - 25, S + 50)
-
-# Option price
-op_price = []
-for i in range(len(u_price)):
-    op_price.append(price_option(u_price[i]))
-
-# print(u_price)
-# print(op_price)
-
-# Plotting the underlying price vs. the option price
-plt.plot(u_price, op_price, color = 'red')
-plt.xlabel('Underlying price', fontsize = 14)
-plt.ylabel('Option price', fontsize = 14)
-plt.title('-and-{} {} barrier option'.format(inOut, putCall), fontsize = 20)
-plt.show()
+df.sort_values('H')
 
