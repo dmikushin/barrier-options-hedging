@@ -4,6 +4,20 @@ from matplotlib import pyplot as plt
 from scipy import stats
 from scipy import optimize
 
+K = 100  # Strike price of an option
+mu = 0.01
+sigma = 0.25  # Volatility
+r = 0.01  # Yearly interest rate
+
+# set the random seed https://en.wikipedia.org/wiki/Random_seed
+np.random.seed(123)
+
+# create a pricing function
+def gen_path(Spot, nPaths, nSteps):
+    dw = np.random.normal(loc=0.0, scale=1.0, size=(nSteps, nPaths))
+    S = Spot * np.exp(np.cumsum((mu - 0.5 * sigma ** 2) * 1 / 252 + sigma * np.sqrt(1 / 252) * dw, axis=0))
+    return S
+
 ##################
 # exercise 3 + 4
 ##################
