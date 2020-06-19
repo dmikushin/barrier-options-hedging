@@ -2,9 +2,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import stats
-import pybobyqa
 from scipy import optimize
-import seaborn as sns
+
 #####################################################################
 #               Generate random paths for shares
 #####################################################################
@@ -146,13 +145,13 @@ hedge_mat = np.array(hedge_mat)
 rep_error = np.abs(real_mat - hedge_mat)
 
 # plot the distribution of the error
-sns.distplot(rep_error.flatten())
+plt.hist(rep_error.flatten(), bins=50)
 plt.title('replication error')
 plt.show()
 
 # plot the distribution fo the portfolios
-sns.distplot(real_mat.flatten(), label='Real portfolio')
-sns.distplot(hedge_mat.flatten(), label='Replicating portfolio')
+plt.hist(real_mat.flatten(), bins=50, label='Real portfolio')
+plt.hist(hedge_mat.flatten(), bins=50, label='Replicating portfolio', alpha=0.5)
 plt.legend()
 plt.show()
 
