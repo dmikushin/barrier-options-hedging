@@ -4,63 +4,6 @@ from matplotlib import pyplot as plt
 from scipy import stats
 from scipy import optimize
 
-#####################################################################
-#               Generate random paths for shares
-#####################################################################
-
-Spot = 100  # Initial stock price
-K = 100  # Strike price of an option
-Ts = [0.5, 1, 1.5]  # Time to maturity, years
-sigma = 0.25  # Volatility
-r = 0.01  # Yearly interest rate
-mu = 0.01
-Hs = [50, 60, 70]  # Barrier level
-
-# number of paths
-
-# set the random seed https://en.wikipedia.org/wiki/Random_seed
-np.random.seed(123)
-
-##################
-# exercise 1
-##################
-
-# nSteps=300; Spot=100; H=70; nPaths = 1000*10
-
-# create a pricing function
-def gen_path(Spot, nPaths, nSteps):
-    dw = np.random.normal(loc=0.0, scale=1.0, size=(nSteps, nPaths))
-    S = Spot * np.exp(np.cumsum((mu - 0.5 * sigma ** 2) * 1 / 252 + sigma * np.sqrt(1 / 252) * dw, axis=0))
-    return S
-
-
-def barrier_price(nSteps, Spot, H=80, nPaths=1000 * 10):
-    T = nSteps / 252
-    # random generation for the normal distribution with mean 0 and standard deviation 1
-    S = gen_path(Spot, nPaths, nSteps)
-    payoff = np.maximum(K - S[-1, :], 0) * (np.min(S, 0) < H)  # "in" option "put"
-    payoff = payoff * (1 + r) ** (-T)
-    price = np.mean(payoff)
-    return price
-
-
-##################
-# exercise 2
-##################
-df = []
-for iH in range(len(Hs)):
-    for iT in range(len(Ts)):
-        H = Hs[iH]
-        nSteps = int(252 * Ts[iT])
-
-        price = barrier_price(nSteps, 100, H)
-        row = pd.Series(data={'H': H, 'T': Ts[iT], 'price': price})
-        df.append(row)
-
-df = pd.concat(df, 1).T
-print(df)
-
-
 ##################
 # exercise 3 + 4
 ##################
@@ -154,22 +97,3 @@ plt.hist(real_mat.flatten(), bins=50, label='Real portfolio')
 plt.hist(hedge_mat.flatten(), bins=50, label='Replicating portfolio', alpha=0.5)
 plt.legend()
 plt.show()
-
-##################
-# Exercise 5
-##################
-
-# The numerical static approach can easily be extended to attempt a static hedging strategy.
-# The universe of call and put options needs to be extended to include options on all 3 assets in the baskets.
-# The rest of the optimization procedure can stay the same.
-#
-# However, it is clear that the computaitonal cost will grow exponentially and better optimization procedure may be require.
-#
-# It's also obvious that dynamic rebalancing may strongly improve the replication quality of such structured products.
-# Indeed, if assets 1's values goes through the roof, while asset 2 goes close to zero, the probability that asset 1 will ever be relevant to the payoff DIP(T) becomes negligable.
-# It follows that options on asset 1 will not be usefull in replicating the DIP's values.
-#
-# A simple approach could be to estimate the static portfolio on each individual asset for a single barrier option.
-# The hedging portoflio of the worst basket of options could be some weighted sum of those three payoffs.
-# The weights in this sum would be function of the respective spot value of the three assets and their volatility---that is, the probabiltiy that asset i's values will be the smallest one at maturity.
-#
